@@ -133,12 +133,49 @@ function TrashIcon(props) {
   );
 }
 
+function MenuIcon(props) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      {...props}
+    >
+      <path d="M4 6h16" />
+      <path d="M4 12h16" />
+      <path d="M4 18h16" />
+    </svg>
+  );
+}
+
+function XIcon(props) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      {...props}
+    >
+      <path d="M18 6 6 18" />
+      <path d="M6 6l12 12" />
+    </svg>
+  );
+}
+
 export default function DashboardsPage() {
   const [keys, setKeys] = useState([]);
   const [name, setName] = useState("");
   const [query, setQuery] = useState("");
   const [revealed, setRevealed] = useState(() => new Set());
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [isDesktopSidebarOpen, setIsDesktopSidebarOpen] = useState(true);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [toast, setToast] = useState(null); // { message: string, kind: "success" | "error" | "delete" } | null
   const nameInputRef = useRef(null);
   const toastTimerRef = useRef(null);
@@ -356,39 +393,113 @@ export default function DashboardsPage() {
           </div>
         </div>
       )}
-      <div className="mx-auto grid w-full max-w-6xl grid-cols-1 gap-6 px-4 py-6 sm:px-6 lg:grid-cols-[260px_1fr] lg:gap-8 lg:px-8 lg:py-10">
-        <aside className="rounded-3xl border border-black/[.08] bg-white p-4 shadow-sm dark:border-white/[.145] dark:bg-black">
-          <div className="flex items-center justify-between px-2 py-2">
-            <div className="text-lg font-semibold tracking-tight">Dandi</div>
-            <Link
-              href="/"
-              className="text-xs text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
-            >
-              Home
-            </Link>
-          </div>
+      {isMobileSidebarOpen && (
+        <div className="fixed inset-0 z-50 lg:hidden">
+          <div
+            className="absolute inset-0 bg-black/40"
+            onClick={() => setIsMobileSidebarOpen(false)}
+            aria-hidden="true"
+          />
+          <aside className="relative h-full w-[260px] overflow-y-auto rounded-3xl border border-black/[.08] bg-white p-4 shadow-sm dark:border-white/[.145] dark:bg-black">
+            <div className="flex items-center justify-between px-2 py-2">
+              <div className="text-lg font-semibold tracking-tight">Dandi AI</div>
+              <button
+                type="button"
+                onClick={() => setIsMobileSidebarOpen(false)}
+                className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-black/[.08] bg-white text-zinc-900 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:bg-black dark:text-zinc-50 dark:hover:bg-[#1a1a1a]"
+                aria-label="Close sidebar"
+              >
+                <XIcon className="h-4 w-4" />
+              </button>
+            </div>
 
-          <nav className="mt-3 space-y-1">
-            <Link
-              href="/dashboards"
-              className="flex items-center justify-between rounded-2xl bg-black/[.04] px-3 py-2 text-sm font-medium dark:bg-white/[.08]"
-            >
-              <span>Overview</span>
-              <span className="text-xs text-zinc-600 dark:text-zinc-400">Pages</span>
-            </Link>
-            <div className="rounded-2xl px-3 py-2 text-sm text-zinc-600 dark:text-zinc-400">Research Assistant</div>
-            <div className="rounded-2xl px-3 py-2 text-sm text-zinc-600 dark:text-zinc-400">Research Reports</div>
-            <div className="rounded-2xl px-3 py-2 text-sm text-zinc-600 dark:text-zinc-400">API Playground</div>
-            <div className="rounded-2xl px-3 py-2 text-sm text-zinc-600 dark:text-zinc-400">Invoices</div>
-            <div className="rounded-2xl px-3 py-2 text-sm text-zinc-600 dark:text-zinc-400">Documentation</div>
-          </nav>
-        </aside>
+            <nav className="mt-3 space-y-1">
+              <Link
+                href="/"
+                onClick={() => setIsMobileSidebarOpen(false)}
+                className="flex items-center justify-between rounded-2xl bg-black/[.04] px-3 py-2 text-sm font-medium dark:bg-white/[.08]"
+              >
+                <span>Home</span>
+                <span className="text-xs text-zinc-600 dark:text-zinc-400">Pages</span>
+              </Link>
+              <Link
+                href="/dashboards"
+                onClick={() => setIsMobileSidebarOpen(false)}
+                className="flex items-center justify-between rounded-2xl bg-black/[.04] px-3 py-2 text-sm font-medium dark:bg-white/[.08]"
+              >
+                <span>Overview</span>
+                <span className="text-xs text-zinc-600 dark:text-zinc-400">Pages</span>
+              </Link>
+              <div className="rounded-2xl px-3 py-2 text-sm text-zinc-600 dark:text-zinc-400">Research Assistant</div>
+              <div className="rounded-2xl px-3 py-2 text-sm text-zinc-600 dark:text-zinc-400">Research Reports</div>
+              <div className="rounded-2xl px-3 py-2 text-sm text-zinc-600 dark:text-zinc-400">API Playground</div>
+              <div className="rounded-2xl px-3 py-2 text-sm text-zinc-600 dark:text-zinc-400">Invoices</div>
+              <div className="rounded-2xl px-3 py-2 text-sm text-zinc-600 dark:text-zinc-400">Documentation</div>
+            </nav>
+          </aside>
+        </div>
+      )}
+      <div
+        className={`mx-auto grid w-full max-w-6xl grid-cols-1 gap-6 px-4 py-6 sm:px-6 lg:gap-8 lg:px-8 lg:py-10 ${
+          isDesktopSidebarOpen ? "lg:grid-cols-[260px_1fr]" : "lg:grid-cols-[56px_1fr]"
+        }`}
+      >
+        <div
+          className="hidden h-full lg:block"
+          onMouseEnter={() => setIsDesktopSidebarOpen(true)}
+          onMouseLeave={() => setIsDesktopSidebarOpen(false)}
+        >
+          {isDesktopSidebarOpen ? (
+            <aside className="rounded-3xl border border-black/[.08] bg-white p-4 shadow-sm dark:border-white/[.145] dark:bg-black">
+              <div className="flex items-center justify-between px-2 py-2">
+                <div className="text-lg font-semibold tracking-tight">Dandi AI</div>
+                <Link
+                  href="/"
+                  className="text-xs text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
+                >
+                  Home
+                </Link>
+              </div>
+
+              <nav className="mt-3 space-y-1">
+                <Link
+                  href="/dashboards"
+                  className="flex items-center justify-between rounded-2xl bg-black/[.04] px-3 py-2 text-sm font-medium dark:bg-white/[.08]"
+                >
+                  <span>Overview</span>
+                  <span className="text-xs text-zinc-600 dark:text-zinc-400">Pages</span>
+                </Link>
+                <div className="rounded-2xl px-3 py-2 text-sm text-zinc-600 dark:text-zinc-400">Research Assistant</div>
+                <div className="rounded-2xl px-3 py-2 text-sm text-zinc-600 dark:text-zinc-400">Research Reports</div>
+                <div className="rounded-2xl px-3 py-2 text-sm text-zinc-600 dark:text-zinc-400">API Playground</div>
+                <div className="rounded-2xl px-3 py-2 text-sm text-zinc-600 dark:text-zinc-400">Invoices</div>
+                <div className="rounded-2xl px-3 py-2 text-sm text-zinc-600 dark:text-zinc-400">Documentation</div>
+              </nav>
+            </aside>
+          ) : (
+            <div className="h-full rounded-3xl border border-black/[.08] bg-white p-2 shadow-sm dark:border-white/[.145] dark:bg-black">
+              <div className="mt-2 flex h-9 w-full items-center justify-center rounded-2xl bg-black/[.04] dark:bg-white/[.06]">
+                <MenuIcon className="h-4 w-4 text-zinc-700 dark:text-zinc-200" />
+              </div>
+            </div>
+          )}
+        </div>
 
         <main className="min-w-0">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-            <div className="space-y-1">
-              <div className="text-xs text-zinc-600 dark:text-zinc-400">Pages / Overview</div>
-              <h1 className="text-3xl font-semibold tracking-tight">Overview</h1>
+            <div className="flex items-start gap-3">
+              <button
+                type="button"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-black/[.08] bg-white text-zinc-900 shadow-sm transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:bg-black dark:text-zinc-50 dark:hover:bg-[#1a1a1a] lg:hidden"
+                onClick={() => setIsMobileSidebarOpen((v) => !v)}
+                aria-label={isMobileSidebarOpen ? "Close sidebar" : "Open sidebar"}
+              >
+                {isMobileSidebarOpen ? <XIcon className="h-4 w-4" /> : <MenuIcon className="h-4 w-4" />}
+              </button>
+              <div className="space-y-1">
+                <div className="text-xs text-zinc-600 dark:text-zinc-400">Pages / Overview</div>
+                <h1 className="text-3xl font-semibold tracking-tight">Overview</h1>
+              </div>
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
@@ -531,7 +642,7 @@ export default function DashboardsPage() {
             </div>
           </section>
           {isCreateOpen && (
-            <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/40 px-4">
+            <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/40 px-4">
               <div className="w-full max-w-md rounded-3xl bg-white p-6 text-sm shadow-2xl dark:bg-zinc-950">
                 <h3 className="text-lg font-semibold tracking-tight">Create a new API key</h3>
                 <p className="mt-1 text-xs text-zinc-600 dark:text-zinc-400">
