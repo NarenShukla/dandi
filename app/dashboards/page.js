@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { supabase } from "@/lib/supabaseClient";
 
 const STORAGE_KEY = "apiKeys";
 const DEFAULT_PLAN = {
@@ -103,6 +104,14 @@ function CopyIcon(props) {
   );
 }
 
+function CheckIcon(props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <path d="M20 6L9 17l-5-5" />
+    </svg>
+  );
+}
+
 function RefreshIcon(props) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" {...props}>
@@ -129,13 +138,62 @@ export default function DashboardsPage() {
   const [name, setName] = useState("");
   const [query, setQuery] = useState("");
   const [revealed, setRevealed] = useState(() => new Set());
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [toast, setToast] = useState(null); // { message: string, kind: "success" | "error" | "delete" } | null
   const nameInputRef = useRef(null);
+  const toastTimerRef = useRef(null);
 
   useEffect(() => {
-    setKeys(loadKeys());
+    return () => {
+      if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    };
+  }, []);
+
+  function showToast(message, kind = "success") {
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    setToast({ message, kind });
+    toastTimerRef.current = setTimeout(() => {
+      setToast(null);
+    }, 2200);
+  }
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function fetchKeys() {
+      const { data, error } = await supabase
+        .from("api_keys")
+        .select("id, name, key, usage, created_at, updated_at")
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error("Failed to load API keys from Supabase", error);
+        if (!cancelled) setKeys(loadKeys());
+        return;
+      }
+
+      if (!cancelled) {
+        const mapped = (data ?? []).map((row) => ({
+          id: row.id,
+          name: row.name ?? "Untitled key",
+          key: row.key,
+          usage: row.usage ?? 0,
+          createdAt: row.created_at,
+          updatedAt: row.updated_at ?? row.created_at,
+        }));
+        setKeys(mapped);
+      }
+    }
+
+    fetchKeys();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {
+    // Keep localStorage for offline/demo fallback.
     saveKeys(keys);
   }, [keys]);
 
@@ -148,24 +206,58 @@ export default function DashboardsPage() {
   function onCreate(e) {
     e.preventDefault();
     const trimmed = name.trim();
-    const item = {
-      id: uuid(),
+    const localId = uuid();
+    const now = new Date().toISOString();
+    const keyValue = generateApiKey();
+    const optimistic = {
+      id: localId,
       name: trimmed || "Untitled key",
-      key: generateApiKey(),
+      key: keyValue,
       usage: 0,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      createdAt: now,
+      updatedAt: now,
     };
-    setKeys((prev) => [item, ...prev]);
+    setKeys((prev) => [optimistic, ...prev]);
     setName("");
-    nameInputRef.current?.focus?.();
+    setIsCreateOpen(false);
+    showToast("Created new API key", "success");
+
+    supabase
+      .from("api_keys")
+      .insert({
+        id: localId,
+        name: optimistic.name,
+        key: optimistic.key,
+        usage: optimistic.usage,
+      })
+      .select("id, created_at, updated_at")
+      .single()
+      .then(({ error, data }) => {
+        if (error) {
+          console.error("Failed to create API key in Supabase", error);
+          return;
+        }
+        if (!data) return;
+        setKeys((prev) =>
+          prev.map((k) =>
+            k.id === localId
+              ? {
+                  ...k,
+                  createdAt: data.created_at,
+                  updatedAt: data.updated_at ?? data.created_at,
+                }
+              : k
+          )
+        );
+      });
   }
 
   async function copyToClipboard(text) {
     try {
       await navigator.clipboard.writeText(text);
+      showToast("Copied API key to clipboard", "success");
     } catch {
-      // ignore
+      showToast("Failed to copy to clipboard", "error");
     }
   }
 
@@ -179,21 +271,44 @@ export default function DashboardsPage() {
   }
 
   function updateName(id, nextName) {
+    const updatedAt = new Date().toISOString();
     setKeys((prev) =>
-      prev.map((k) =>
-        k.id === id ? { ...k, name: nextName, updatedAt: new Date().toISOString() } : k
-      )
+      prev.map((k) => (k.id === id ? { ...k, name: nextName, updatedAt } : k))
     );
+
+    supabase
+      .from("api_keys")
+      .update({ name: nextName, updated_at: updatedAt })
+      .eq("id", id)
+      .then(({ error }) => {
+        if (error) {
+          console.error("Failed to update API key name in Supabase", error);
+          showToast("Failed to rename API key", "error");
+          return;
+        }
+        showToast("Updated API key name", "success");
+      });
   }
 
   function regenerate(id) {
+    const nextKey = generateApiKey();
+    const updatedAt = new Date().toISOString();
     setKeys((prev) =>
-      prev.map((k) =>
-        k.id === id
-          ? { ...k, key: generateApiKey(), updatedAt: new Date().toISOString() }
-          : k
-      )
+      prev.map((k) => (k.id === id ? { ...k, key: nextKey, updatedAt } : k))
     );
+
+    supabase
+      .from("api_keys")
+      .update({ key: nextKey, updated_at: updatedAt })
+      .eq("id", id)
+      .then(({ error }) => {
+        if (error) {
+          console.error("Failed to regenerate API key in Supabase", error);
+          showToast("Failed to regenerate API key", "error");
+          return;
+        }
+        showToast("Regenerated API key", "success");
+      });
   }
 
   function remove(id) {
@@ -203,10 +318,44 @@ export default function DashboardsPage() {
       next.delete(id);
       return next;
     });
+
+    supabase
+      .from("api_keys")
+      .delete()
+      .eq("id", id)
+      .then(({ error }) => {
+        if (error) {
+          console.error("Failed to delete API key in Supabase", error);
+          showToast("Failed to delete API key", "error");
+          return;
+        }
+        showToast("Deleted API key", "delete");
+      });
   }
 
   return (
     <div className="min-h-screen bg-zinc-50 font-sans text-zinc-950 dark:bg-black dark:text-zinc-50">
+      {toast && (
+        <div className="pointer-events-none fixed right-4 top-4 z-50">
+          <div
+            className={[
+              "flex items-center gap-2 rounded-full px-4 py-2 text-xs font-medium shadow-lg backdrop-blur",
+              toast.kind === "delete"
+                ? "bg-red-500 text-white"
+                : "bg-emerald-500 text-white",
+            ].join(" ")}
+          >
+            <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-black/10">
+              {toast.kind === "delete" ? (
+                <TrashIcon className="h-4 w-4" />
+              ) : (
+                <CheckIcon className="h-4 w-4" />
+              )}
+            </span>
+            <span className="max-w-[260px] truncate">{toast.message}</span>
+          </div>
+        </div>
+      )}
       <div className="mx-auto grid w-full max-w-6xl grid-cols-1 gap-6 px-4 py-6 sm:px-6 lg:grid-cols-[260px_1fr] lg:gap-8 lg:px-8 lg:py-10">
         <aside className="rounded-3xl border border-black/[.08] bg-white p-4 shadow-sm dark:border-white/[.145] dark:bg-black">
           <div className="flex items-center justify-between px-2 py-2">
@@ -295,21 +444,19 @@ export default function DashboardsPage() {
                     className="h-10 w-full rounded-2xl border border-black/[.12] bg-transparent px-4 text-sm outline-none transition-colors focus:border-black/30 dark:border-white/[.18] dark:focus:border-white/40"
                   />
                 </div>
-                <form onSubmit={onCreate} className="flex w-full gap-2 sm:w-auto">
-                  <input
-                    ref={nameInputRef}
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="New key name…"
-                    className="h-10 w-full rounded-2xl border border-black/[.12] bg-transparent px-4 text-sm outline-none transition-colors focus:border-black/30 dark:border-white/[.18] dark:focus:border-white/40 sm:w-56"
-                  />
-                  <button
-                    type="submit"
-                    className="inline-flex h-10 shrink-0 items-center justify-center rounded-2xl bg-foreground px-4 text-sm font-medium text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc]"
-                  >
-                    + Add
-                  </button>
-                </form>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setName("");
+                    setIsCreateOpen(true);
+                    setTimeout(() => {
+                      nameInputRef.current?.focus?.();
+                    }, 0);
+                  }}
+                  className="inline-flex h-10 shrink-0 items-center justify-center rounded-2xl bg-foreground px-4 text-sm font-medium text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc]"
+                >
+                  + Create
+                </button>
               </div>
             </div>
 
@@ -383,6 +530,68 @@ export default function DashboardsPage() {
               </table>
             </div>
           </section>
+          {isCreateOpen && (
+            <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/40 px-4">
+              <div className="w-full max-w-md rounded-3xl bg-white p-6 text-sm shadow-2xl dark:bg-zinc-950">
+                <h3 className="text-lg font-semibold tracking-tight">Create a new API key</h3>
+                <p className="mt-1 text-xs text-zinc-600 dark:text-zinc-400">
+                  Enter a name and optional usage limit for the new API key.
+                </p>
+                <form onSubmit={onCreate} className="mt-4 space-y-4">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-medium text-zinc-700 dark:text-zinc-200">
+                      Key name
+                    </label>
+                    <input
+                      ref={nameInputRef}
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="A unique name to identify this key"
+                      className="h-10 w-full rounded-2xl border border-black/[.12] bg-transparent px-3 text-sm outline-none transition-colors focus:border-black/30 dark:border-white/[.18] dark:focus:border-white/40"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="flex items-center gap-2 text-xs text-zinc-700 dark:text-zinc-200">
+                      <input
+                        type="checkbox"
+                        disabled
+                        className="h-3.5 w-3.5 rounded border border-black/[.18] text-foreground"
+                      />
+                      Limit monthly usage
+                    </label>
+                    <input
+                      type="number"
+                      disabled
+                      placeholder="1000"
+                      className="h-9 w-full rounded-2xl border border-black/[.08] bg-black/[.02] px-3 text-xs text-zinc-500 outline-none dark:border-white/[.12] dark:bg-white/[.03]"
+                    />
+                    <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
+                      *If the combined usage of all your keys exceeds your plan&apos;s limit, all requests will be
+                      rejected.
+                    </p>
+                  </div>
+                  <div className="mt-5 flex justify-end gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsCreateOpen(false);
+                        setName("");
+                      }}
+                      className="inline-flex h-9 items-center justify-center rounded-2xl border border-black/[.08] bg-transparent px-4 text-xs font-medium text-zinc-800 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:text-zinc-100 dark:hover:bg-[#1a1a1a]"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="inline-flex h-9 items-center justify-center rounded-2xl bg-foreground px-4 text-xs font-medium text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc]"
+                    >
+                      Create
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
         </main>
       </div>
     </div>
