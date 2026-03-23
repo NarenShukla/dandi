@@ -43,7 +43,14 @@ export function DashboardSidebarMobile({ isOpen, onClose }) {
           </Link>
           <div className="rounded-2xl px-3 py-2 text-sm text-zinc-600 dark:text-zinc-400">Research Assistant</div>
           <div className="rounded-2xl px-3 py-2 text-sm text-zinc-600 dark:text-zinc-400">Research Reports</div>
-          <div className="rounded-2xl px-3 py-2 text-sm text-zinc-600 dark:text-zinc-400">API Playground</div>
+          <Link
+            href="/playground"
+            onClick={onClose}
+            className="flex items-center justify-between rounded-2xl bg-black/[.04] px-3 py-2 text-sm font-medium dark:bg-white/[.08]"
+          >
+            <span>API Playground</span>
+            <span className="text-xs text-zinc-600 dark:text-zinc-400">Pages</span>
+          </Link>
           <div className="rounded-2xl px-3 py-2 text-sm text-zinc-600 dark:text-zinc-400">Invoices</div>
           <div className="rounded-2xl px-3 py-2 text-sm text-zinc-600 dark:text-zinc-400">Documentation</div>
         </nav>
@@ -81,7 +88,13 @@ export function DashboardSidebarDesktop({ isOpen, onMouseEnter, onMouseLeave }) 
             </Link>
             <div className="rounded-2xl px-3 py-2 text-sm text-zinc-600 dark:text-zinc-400">Research Assistant</div>
             <div className="rounded-2xl px-3 py-2 text-sm text-zinc-600 dark:text-zinc-400">Research Reports</div>
-            <div className="rounded-2xl px-3 py-2 text-sm text-zinc-600 dark:text-zinc-400">API Playground</div>
+            <Link
+              href="/playground"
+              className="flex items-center justify-between rounded-2xl bg-black/[.04] px-3 py-2 text-sm font-medium dark:bg-white/[.08]"
+            >
+              <span>API Playground</span>
+              <span className="text-xs text-zinc-600 dark:text-zinc-400">Pages</span>
+            </Link>
             <div className="rounded-2xl px-3 py-2 text-sm text-zinc-600 dark:text-zinc-400">Invoices</div>
             <div className="rounded-2xl px-3 py-2 text-sm text-zinc-600 dark:text-zinc-400">Documentation</div>
           </nav>
