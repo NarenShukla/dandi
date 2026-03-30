@@ -25,7 +25,12 @@ function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50 font-sans text-zinc-950 dark:bg-black dark:text-zinc-50">
+    <div className="relative font-sans text-foreground">
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute top-0 right-1/4 h-96 w-96 rounded-full bg-primary/10 opacity-20 blur-3xl" />
+        <div className="absolute bottom-0 left-1/4 h-96 w-96 rounded-full bg-accent/10 opacity-10 blur-3xl" />
+      </div>
+
       <DashboardToast toast={api.toast} />
 
       <DashboardSidebarMobile
@@ -34,7 +39,7 @@ function DashboardPage() {
       />
 
       <div
-        className={`mx-auto grid w-full max-w-6xl grid-cols-1 gap-6 px-4 py-6 sm:px-6 lg:gap-8 lg:px-8 lg:py-10 ${
+        className={`relative mx-auto grid w-full max-w-7xl grid-cols-1 gap-6 px-4 py-8 sm:px-6 lg:gap-8 lg:px-8 lg:py-10 ${
           api.isDesktopSidebarOpen ? "lg:grid-cols-[260px_1fr]" : "lg:grid-cols-[56px_1fr]"
         }`}
       >
@@ -49,26 +54,26 @@ function DashboardPage() {
             <div className="flex items-start gap-3">
               <button
                 type="button"
-                className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-black/[.08] bg-white text-zinc-900 shadow-sm transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:bg-black dark:text-zinc-50 dark:hover:bg-[#1a1a1a] lg:hidden"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border bg-card text-foreground shadow-sm transition-colors hover:bg-muted lg:hidden"
                 onClick={() => api.setIsMobileSidebarOpen((v) => !v)}
                 aria-label={api.isMobileSidebarOpen ? "Close sidebar" : "Open sidebar"}
               >
                 {api.isMobileSidebarOpen ? <XIcon className="h-4 w-4" /> : <MenuIcon className="h-4 w-4" />}
               </button>
               <div className="space-y-1">
-                <div className="text-xs text-zinc-600 dark:text-zinc-400">Pages / Overview</div>
-                <h1 className="text-3xl font-semibold tracking-tight">Overview</h1>
+                <div className="text-xs text-muted-foreground">Pages / Overview</div>
+                <h1 className="text-3xl font-semibold tracking-tight text-foreground">Overview</h1>
               </div>
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
-              <div className="inline-flex items-center gap-2 rounded-full border border-black/[.08] bg-white px-3 py-1.5 text-xs text-zinc-700 shadow-sm dark:border-white/[.145] dark:bg-black dark:text-zinc-200">
+              <div className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5 text-xs text-muted-foreground shadow-sm">
                 <span className="h-2 w-2 rounded-full bg-emerald-500" />
                 Operational
               </div>
               <button
                 type="button"
-                className="inline-flex h-9 items-center justify-center rounded-full border border-black/[.08] bg-white px-4 text-xs font-medium transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:bg-black dark:hover:bg-[#1a1a1a]"
+                className="inline-flex h-9 items-center justify-center rounded-full border border-border bg-card px-4 text-xs font-medium text-foreground transition-colors hover:bg-muted"
               >
                 Manage plan
               </button>
