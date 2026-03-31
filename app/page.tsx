@@ -3,6 +3,7 @@ import { authOptions } from '@/lib/auth';
 import { Header } from '@/components/landing/header';
 import { Hero } from '@/components/landing/hero';
 import { Features } from '@/components/landing/features';
+import { GithubSummarizerDemo } from '@/components/landing/github-summarizer-demo';
 import { Pricing } from '@/components/landing/pricing';
 import { FAQ } from '@/components/landing/faq';
 import { Footer } from '@/components/landing/footer';
@@ -15,6 +16,7 @@ export default async function Home() {
       <Header session={session} />
       <Hero />
       <Features />
+      <GithubSummarizerDemo />
       <Pricing />
       <FAQ />
       <Footer />

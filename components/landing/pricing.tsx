@@ -16,6 +16,7 @@ const plans = [
     ],
     cta: 'Get Started',
     highlighted: false,
+    comingSoon: false,
   },
   {
     name: 'Pro',
@@ -31,6 +32,7 @@ const plans = [
     ],
     cta: 'Start Free Trial',
     highlighted: true,
+    comingSoon: true,
   },
   {
     name: 'Enterprise',
@@ -46,15 +48,16 @@ const plans = [
     ],
     cta: 'Contact Sales',
     highlighted: false,
+    comingSoon: true,
   },
-];
+] as const;
 
 export function Pricing() {
-  const handleCTA = (planName: string) => {
+  const handleCTA = (planName: string, comingSoon: boolean) => {
+    if (comingSoon) return;
     if (planName === 'Enterprise') {
       window.open('mailto:hello@dandi.app', '_blank');
     } else {
-      // Redirect to sign up
       window.location.href = '/auth/signup';
     }
   };
@@ -89,6 +92,14 @@ export function Pricing() {
                 </div>
               )}
 
+              {plan.comingSoon && (
+                <div className="absolute top-4 right-4">
+                  <span className="rounded-full border border-border bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground">
+                    Coming soon
+                  </span>
+                </div>
+              )}
+
               <div className="mb-6">
                 <h3 className="text-2xl font-bold text-foreground">{plan.name}</h3>
                 <p className="text-sm text-muted-foreground mt-1">{plan.description}</p>
@@ -103,14 +114,17 @@ export function Pricing() {
 
               <Button
                 className={`w-full mb-8 ${
-                  plan.highlighted
-                    ? 'bg-primary hover:bg-primary/90 text-primary-foreground'
-                    : 'border border-primary/20 text-foreground hover:bg-primary/5'
+                  plan.comingSoon
+                    ? 'border-border bg-muted text-muted-foreground shadow-none hover:bg-muted'
+                    : plan.highlighted
+                      ? 'bg-primary hover:bg-primary/90 text-primary-foreground'
+                      : 'border border-primary/20 text-foreground hover:bg-primary/5'
                 }`}
-                variant={plan.highlighted ? 'default' : 'outline'}
-                onClick={() => handleCTA(plan.name)}
+                variant={plan.comingSoon ? 'outline' : plan.highlighted ? 'default' : 'outline'}
+                disabled={plan.comingSoon}
+                onClick={() => handleCTA(plan.name, plan.comingSoon)}
               >
-                {plan.cta}
+                {plan.comingSoon ? 'Coming soon' : plan.cta}
               </Button>
 
               <div className="space-y-3">

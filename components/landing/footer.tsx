@@ -87,7 +87,7 @@ export function Footer() {
         <div className="border-t border-border/40 pt-8">
           <div className="flex items-center justify-between flex-col md:flex-row gap-4">
             <p className="text-sm text-muted-foreground">
-              © 2024 Dandi. All rights reserved.
+              © 2026 Dandi. All rights reserved.
             </p>
             <div className="flex items-center gap-4">
               <Link href="#" className="text-muted-foreground hover:text-foreground transition-colors" aria-label="GitHub">
