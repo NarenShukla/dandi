@@ -4,6 +4,10 @@ import {
   incrementApiKeyUsageAndCheckLimit,
   validateApiKey,
 } from "@/lib/apiKeys/validateApiKey";
+import {
+  fetchGithubRepoInfo,
+  parseGithubRepoUrl,
+} from "@/lib/github-summarizer/get-repo-info";
 
 export async function POST(request) {
   let body;
@@ -51,54 +55,34 @@ export async function POST(request) {
     return NextResponse.json({ message: usageResult.message }, { status: 500 });
   }
 
-  async function getReadmeContent(url) {
-    try {
-      // Parse the repo owner and name from the githubUrl
-      // Support only https://github.com/:owner/:repo or https://github.com/:owner/:repo/...
-      const match = url.match(/^https:\/\/github\.com\/([^/]+)\/([^/]+)(\/|$)/i);
-      if (!match) {
-        return { error: "Invalid GitHub repo URL", content: null };
-      }
-      const owner = match[1];
-      const repo = match[2];
-
-      // Use the GitHub API to fetch the README
-      // No authentication - subject to public unauth throttling
-      const apiUrl = `https://api.github.com/repos/${owner}/${repo}/readme`;
-
-      const res = await fetch(apiUrl, {
-        headers: {
-          Accept: "application/vnd.github.v3.raw",
-        },
-      });
-
-      if (!res.ok) {
-        return { error: `Failed to fetch README: ${res.status} ${res.statusText}`, content: null };
-      }
-
-      const content = await res.text();
-      return { content, error: null };
-    } catch (err) {
-      return { error: err.message || "Unknown error", content: null };
-    }
+  const parsed = parseGithubRepoUrl(githubUrl);
+  if (!parsed) {
+    return NextResponse.json({ message: "Invalid GitHub repo URL" }, { status: 400 });
   }
 
   try {
-    const readmeContentResult = await getReadmeContent(githubUrl);
+    const repoFetch = await fetchGithubRepoInfo(parsed.owner, parsed.repo);
 
-    if (readmeContentResult && !readmeContentResult.error) {
-      const { content } = readmeContentResult;
+    if (repoFetch && !repoFetch.error) {
+      const { content, meta } = repoFetch;
 
       const { summarizeReadme } = await import("@/lib/github-summarizer/chain");
       const summaryResult = await summarizeReadme(content);
 
       return NextResponse.json(
-        { summary: summaryResult.summary, cool_facts: summaryResult.cool_facts },
+        {
+          summary: summaryResult.summary,
+          cool_facts: summaryResult.cool_facts,
+          stars: meta.stars,
+          latest_version: meta.latest_version,
+          website_url: meta.website_url,
+          license: meta.license,
+        },
         { status: 200 }
       );
     }
 
-    console.error("github-summarizer: readme fetch error", readmeContentResult.error);
+    console.error("github-summarizer: repo fetch error", repoFetch.error);
     return NextResponse.json({ message: "Error in GitHub Summarizer (fetch)" }, { status: 500 });
   } catch (err) {
     console.error("github-summarizer: unexpected error", err);
