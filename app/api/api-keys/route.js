@@ -31,6 +31,13 @@ export async function POST(request) {
     body = {};
   }
 
+  if (Object.prototype.hasOwnProperty.call(body, "limit")) {
+    return NextResponse.json(
+      { error: "The usage limit cannot be set through the API or UI." },
+      { status: 400 }
+    );
+  }
+
   const nameRaw = typeof body.name === "string" ? body.name.trim() : "";
   const name = nameRaw || "Untitled key";
   const id = uuid();

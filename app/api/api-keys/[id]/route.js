@@ -47,6 +47,13 @@ export async function PATCH(request, { params }) {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
+  if (Object.prototype.hasOwnProperty.call(body, "limit")) {
+    return NextResponse.json(
+      { error: "The usage limit cannot be changed through the API or UI." },
+      { status: 400 }
+    );
+  }
+
   const wantsRegenerate = body.regenerate === true;
   const hasName = Object.prototype.hasOwnProperty.call(body, "name");
   const name = hasName && typeof body.name === "string" ? body.name.trim() : undefined;

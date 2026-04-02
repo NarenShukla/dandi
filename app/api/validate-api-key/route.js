@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { isApiKeyValid } from "@/lib/apiKeys/validateApiKey";
+import { validateApiKey } from "@/lib/apiKeys/validateApiKey";
 
 export async function POST(request) {
   let body;
@@ -14,12 +14,20 @@ export async function POST(request) {
     return NextResponse.json({ valid: false }, { status: 400 });
   }
 
-  const { valid, error } = await isApiKeyValid(key);
+  const result = await validateApiKey(key);
 
-  if (error) {
-    console.error("validate-api-key Supabase error", error);
+  if (result.ok) {
+    return NextResponse.json({ valid: true });
+  }
+
+  if (result.code === "unavailable") {
+    return NextResponse.json({ valid: false, message: result.message }, { status: 503 });
+  }
+
+  if (result.code === "error") {
+    console.error("validate-api-key Supabase error", result.error);
     return NextResponse.json({ valid: false }, { status: 500 });
   }
 
-  return NextResponse.json({ valid });
+  return NextResponse.json({ valid: false, message: result.message });
 }

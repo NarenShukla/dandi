@@ -77,6 +77,9 @@ export function ApiKeysPanel({
                 const isRevealed = revealed.has(k.id);
                 const displayKey = isRevealed ? k.key : maskKey(k.key);
                 const usage = clampInt(k.usage, 0);
+                const cap = k.limit != null ? clampInt(k.limit, 0) : null;
+                const usageLabel =
+                  cap != null ? `${formatCompactInt(usage)} / ${formatCompactInt(cap)}` : formatCompactInt(usage);
                 return (
                   <tr key={k.id} className="align-top">
                     <td className="px-5 py-4">
@@ -92,7 +95,12 @@ export function ApiKeysPanel({
                         </div>
                       </div>
                     </td>
-                    <td className="px-5 py-4 text-sm text-foreground">{formatCompactInt(usage)}</td>
+                    <td className="px-5 py-4 text-sm text-foreground">
+                      {usageLabel}
+                      {cap != null ? (
+                        <span className="mt-1 block text-[11px] text-muted-foreground">Usage / limit</span>
+                      ) : null}
+                    </td>
                     <td className="px-5 py-4">
                       <code className="inline-flex max-w-[420px] rounded-2xl bg-muted px-3 py-2 text-xs text-foreground">
                         {displayKey}
