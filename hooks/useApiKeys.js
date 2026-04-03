@@ -25,7 +25,6 @@ export function useApiKeys() {
   const [query, setQuery] = useState("");
   const [revealed, setRevealed] = useState(() => new Set());
   const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [isDesktopSidebarOpen, setIsDesktopSidebarOpen] = useState(true);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [toast, setToast] = useState(null);
   const nameInputRef = useRef(null);
@@ -222,8 +221,6 @@ export function useApiKeys() {
     revealed,
     isCreateOpen,
     setIsCreateOpen,
-    isDesktopSidebarOpen,
-    setIsDesktopSidebarOpen,
     isMobileSidebarOpen,
     setIsMobileSidebarOpen,
     toast,

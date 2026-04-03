@@ -20,7 +20,6 @@ export default function PlaygroundPage() {
   const [summarizerResult, setSummarizerResult] = useState(null);
   const [statusBanner, setStatusBanner] = useState(null);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
-  const [isDesktopSidebarOpen, setIsDesktopSidebarOpen] = useState(false);
   const [showApiKey, setShowApiKey] = useState(false);
   const [limitToastOpen, setLimitToastOpen] = useState(false);
   const limitToastTimerRef = useRef(null);
@@ -154,15 +153,11 @@ export default function PlaygroundPage() {
         onClose={() => setIsMobileSidebarOpen(false)}
       />
 
-      <div
-        className={`relative mx-auto grid w-full max-w-7xl grid-cols-1 gap-6 px-4 py-8 sm:px-6 lg:gap-8 lg:px-8 lg:py-10 ${
-          isDesktopSidebarOpen ? "lg:grid-cols-[260px_1fr]" : "lg:grid-cols-[56px_1fr]"
-        }`}
-      >
+      <div className="relative mx-auto grid w-full max-w-7xl grid-cols-1 gap-6 px-4 py-8 sm:px-6 lg:grid-cols-[260px_1fr] lg:gap-8 lg:px-8 lg:py-10">
         <DashboardSidebarDesktop
-          isOpen={isDesktopSidebarOpen}
-          onMouseEnter={() => setIsDesktopSidebarOpen(true)}
-          onMouseLeave={() => setIsDesktopSidebarOpen(false)}
+          isOpen
+          onMouseEnter={() => {}}
+          onMouseLeave={() => {}}
         />
 
         <main className="min-w-0">

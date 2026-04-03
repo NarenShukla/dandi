@@ -9,7 +9,7 @@ const plans = [
     description: 'Perfect for getting started',
     price: '0',
     features: [
-      'Up to 10 repository analyses per month',
+      'Limited to 200 requests',
       'Basic insights (summaries & stars)',
       'Email support',
       'Community access',

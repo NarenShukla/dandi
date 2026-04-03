@@ -38,15 +38,11 @@ function DashboardPage() {
         onClose={() => api.setIsMobileSidebarOpen(false)}
       />
 
-      <div
-        className={`relative mx-auto grid w-full max-w-7xl grid-cols-1 gap-6 px-4 py-8 sm:px-6 lg:gap-8 lg:px-8 lg:py-10 ${
-          api.isDesktopSidebarOpen ? "lg:grid-cols-[260px_1fr]" : "lg:grid-cols-[56px_1fr]"
-        }`}
-      >
+      <div className="relative mx-auto grid w-full max-w-7xl grid-cols-1 gap-6 px-4 py-8 sm:px-6 lg:grid-cols-[260px_1fr] lg:gap-8 lg:px-8 lg:py-10">
         <DashboardSidebarDesktop
-          isOpen={api.isDesktopSidebarOpen}
-          onMouseEnter={() => api.setIsDesktopSidebarOpen(true)}
-          onMouseLeave={() => api.setIsDesktopSidebarOpen(false)}
+          isOpen
+          onMouseEnter={() => {}}
+          onMouseLeave={() => {}}
         />
 
         <main className="min-w-0">
