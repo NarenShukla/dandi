@@ -66,13 +66,6 @@ export function Header({ session = null, navVariant = 'landing' }: HeaderProps) 
                   >
                     Dashboards
                   </Link>
-                  <Link
-                    href="/protected"
-                    className="text-sm font-medium text-primary underline-offset-4 hover:underline"
-                    aria-current={pathname === '/protected' ? 'page' : undefined}
-                  >
-                    Protected
-                  </Link>
                 </nav>
                 <div className="flex min-w-0 max-w-[min(100%,14rem)] items-center gap-2 sm:max-w-[18rem]">
                   {user.image ? (

@@ -1,6 +1,6 @@
 import authMiddleware from "next-auth/middleware";
 
-export default authMiddleware;
+export const proxy = authMiddleware;
 
 export const config = {
   matcher: ["/dashboards", "/dashboards/:path*"],

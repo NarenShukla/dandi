@@ -1,7 +1,18 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { MenuIcon, XIcon } from "./icons";
 
+function navItemClass(isActive) {
+  return [
+    "flex items-center justify-between rounded-2xl px-3 py-2 text-sm font-medium text-foreground",
+    isActive ? "bg-primary/10 ring-1 ring-primary/20" : "bg-muted/80",
+  ].join(" ");
+}
+
 export function DashboardSidebarMobile({ isOpen, onClose }) {
+  const pathname = usePathname();
   if (!isOpen) return null;
 
   return (
@@ -28,7 +39,7 @@ export function DashboardSidebarMobile({ isOpen, onClose }) {
           <Link
             href="/"
             onClick={onClose}
-            className="flex items-center justify-between rounded-2xl bg-muted/80 px-3 py-2 text-sm font-medium text-foreground"
+            className={navItemClass(pathname === "/")}
           >
             <span>Home</span>
             <span className="text-xs text-muted-foreground">Pages</span>
@@ -36,17 +47,17 @@ export function DashboardSidebarMobile({ isOpen, onClose }) {
           <Link
             href="/dashboards"
             onClick={onClose}
-            className="flex items-center justify-between rounded-2xl bg-primary/10 px-3 py-2 text-sm font-medium text-foreground ring-1 ring-primary/20"
+            className={navItemClass(pathname === "/dashboards")}
           >
             <span>Overview</span>
             <span className="text-xs text-muted-foreground">Pages</span>
           </Link>
-          <div className="rounded-2xl px-3 py-2 text-sm text-muted-foreground">Research Assistant</div>
-          <div className="rounded-2xl px-3 py-2 text-sm text-muted-foreground">Research Reports</div>
+          {/* <div className="rounded-2xl px-3 py-2 text-sm text-muted-foreground">Research Assistant</div>
+          <div className="rounded-2xl px-3 py-2 text-sm text-muted-foreground">Research Reports</div> */}
           <Link
             href="/playground"
             onClick={onClose}
-            className="flex items-center justify-between rounded-2xl bg-muted/80 px-3 py-2 text-sm font-medium text-foreground"
+            className={navItemClass(pathname === "/playground")}
           >
             <span>API Playground</span>
             <span className="text-xs text-muted-foreground">Pages</span>
@@ -60,6 +71,8 @@ export function DashboardSidebarMobile({ isOpen, onClose }) {
 }
 
 export function DashboardSidebarDesktop({ isOpen, onMouseEnter, onMouseLeave }) {
+  const pathname = usePathname();
+
   return (
     <div
       className="hidden h-full lg:block"
@@ -81,16 +94,16 @@ export function DashboardSidebarDesktop({ isOpen, onMouseEnter, onMouseLeave }) 
           <nav className="mt-3 space-y-1">
             <Link
               href="/dashboards"
-              className="flex items-center justify-between rounded-2xl bg-primary/10 px-3 py-2 text-sm font-medium text-foreground ring-1 ring-primary/20"
+              className={navItemClass(pathname === "/dashboards")}
             >
               <span>Overview</span>
               <span className="text-xs text-muted-foreground">Pages</span>
             </Link>
-            <div className="rounded-2xl px-3 py-2 text-sm text-muted-foreground">Research Assistant</div>
-            <div className="rounded-2xl px-3 py-2 text-sm text-muted-foreground">Research Reports</div>
+            {/* <div className="rounded-2xl px-3 py-2 text-sm text-muted-foreground">Research Assistant</div>
+            <div className="rounded-2xl px-3 py-2 text-sm text-muted-foreground">Research Reports</div> */}
             <Link
               href="/playground"
-              className="flex items-center justify-between rounded-2xl bg-muted/80 px-3 py-2 text-sm font-medium text-foreground"
+              className={navItemClass(pathname === "/playground")}
             >
               <span>API Playground</span>
               <span className="text-xs text-muted-foreground">Pages</span>

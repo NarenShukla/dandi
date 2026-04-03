@@ -17,7 +17,11 @@ export async function POST(request) {
   const result = await validateApiKey(key);
 
   if (result.ok) {
-    return NextResponse.json({ valid: true });
+    return NextResponse.json({
+      valid: true,
+      usage: result.row.usage,
+      limit: result.row.limit,
+    });
   }
 
   if (result.code === "unavailable") {
